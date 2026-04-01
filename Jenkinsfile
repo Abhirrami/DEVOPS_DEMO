@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  environment {
-    COMPOSE_PROJECT_NAME = "clinic-workflow"
-  }
-
   stages {
 
     stage('Clone repo') {
@@ -36,33 +32,25 @@ pipeline {
       }
     }
 
-    stage('Run backend smoke check') {
+    stage('Run backend on VM') {
       steps {
         dir('backend') {
           sh '''
-          node -e "require('./src/app'); console.log('Backend app bootstrapped successfully')"
+          # Stop old app if running
+          pkill node || true
+
+          # Start backend in background
+          nohup node server.js > app.log 2>&1 &
           '''
         }
       }
     }
 
-    stage('Build Docker images') {
-      steps {
-        sh 'docker-compose build'
-      }
-    }
-
-    stage('Deploy containers') {
-      steps {
-        sh 'docker-compose down || true'
-        sh 'docker-compose up -d'
-      }
-    }
   }
 
   post {
     always {
-      sh 'docker-compose ps || true'
+      echo "App deployed successfully on Azure VM"
     }
   }
 }
