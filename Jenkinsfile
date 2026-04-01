@@ -24,7 +24,7 @@ pipeline {
       steps {
         dir('frontend') {
           sh '''
-          npm install
+          export NODE_OPTIONS="--max-old-space-size=512"
           chmod +x node_modules/.bin/vite || true
           npm run build
           '''
@@ -32,15 +32,12 @@ pipeline {
       }
     }
 
-    stage('Run backend on VM') {
+    stage('Run backend') {
       steps {
         dir('backend') {
           sh '''
-          # Stop old app if running
           pkill node || true
-
-          # Start backend in background
-          nohup node server.js > app.log 2>&1 &
+          nohup node src/server.js > app.log 2>&1 &
           '''
         }
       }
@@ -50,7 +47,7 @@ pipeline {
 
   post {
     always {
-      echo "App deployed successfully on Azure VM"
+      echo "Full stack app deployed successfully"
     }
   }
 }
