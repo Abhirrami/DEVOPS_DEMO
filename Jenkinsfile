@@ -46,23 +46,21 @@ pipeline {
       }
     }
 
-    stage('Build Docker images') {
-      steps {
-        sh 'docker compose build'
-      }
-    }
-
-    stage('Deploy containers') {
-      steps {
-        sh 'docker compose down || true'
-        sh 'docker compose up -d'
-      }
-    }
+   stage('Build Docker images') {
+  steps {
+    sh 'docker-compose build'
   }
+}
 
-  post {
-    always {
-      sh 'docker compose ps || true'
-    }
+stage('Deploy containers') {
+  steps {
+    sh 'docker-compose down || true'
+    sh 'docker-compose up -d'
+  }
+}
+
+post {
+  always {
+    sh 'docker-compose ps || true'
   }
 }
