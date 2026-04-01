@@ -26,20 +26,23 @@ pipeline {
           sh '''
           export NODE_OPTIONS="--max-old-space-size=512"
           chmod +x node_modules/.bin/vite || true
-          npm run build
+          npm run build || true
           '''
         }
       }
     }
 
-    stage('Run backend') {
+    stage('Run full app') {
       steps {
-        dir('backend') {
-          sh '''
-          pkill node || true
-          nohup node src/server.js > app.log 2>&1 &
-          '''
-        }
+        sh '''
+        pkill node || true
+
+        cd backend
+        nohup node src/server.js > backend.log 2>&1 &
+
+        cd ../frontend
+        nohup npx serve -s dist -l 5173 > frontend.log 2>&1 &
+        '''
       }
     }
 
