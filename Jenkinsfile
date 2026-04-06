@@ -26,7 +26,7 @@ pipeline {
           sh '''
           export NODE_OPTIONS="--max-old-space-size=512"
           chmod +x node_modules/.bin/vite || true
-          npm run build || true
+          npm run build
           '''
         }
       }
@@ -45,11 +45,11 @@ pipeline {
 
         echo "Starting frontend..."
         cd ../frontend
-        nohup npx serve -s dist -l 5173 > frontend.log 2>&1 &
+        nohup npm run preview -- --host 0.0.0.0 --port 5173 > frontend.log 2>&1 &
         sleep 5
 
         echo "Running processes:"
-        ps aux | grep node
+        ps aux | grep -E "node|vite"
         '''
       }
     }

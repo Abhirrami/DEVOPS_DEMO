@@ -10,10 +10,32 @@ const adminRoutes = require("./routes/adminRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 
 const app = express();
+const configuredOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (configuredOrigins.includes(origin)) {
+    return true;
+  }
+
+  return /^https?:\/\/[^/]+:5173$/.test(origin);
+};
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS origin not allowed"));
+    },
     credentials: true,
   })
 );

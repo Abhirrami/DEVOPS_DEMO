@@ -6,17 +6,41 @@ const connectDB = require("./config/db");
 const app = require("./app");
 const { setIO } = require("./config/socket");
 const Appointment = require("./models/Appointment");
+const ensureAdminUser = require("./utils/ensureAdminUser");
 
 const PORT = process.env.PORT || 5000;
+const configuredOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (configuredOrigins.includes(origin)) {
+    return true;
+  }
+
+  return /^https?:\/\/[^/]+:5173$/.test(origin);
+};
 
 const startServer = async () => {
   await connectDB();
+  const adminResult = await ensureAdminUser();
   await Appointment.syncIndexes();
 
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin(origin, callback) {
+        if (isAllowedOrigin(origin)) {
+          return callback(null, true);
+        }
+
+        return callback(new Error("Socket origin not allowed"));
+      },
       methods: ["GET", "POST"],
     },
   });
@@ -33,7 +57,12 @@ const startServer = async () => {
     });
   });
 
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(
+      adminResult.created
+        ? `Seeded admin user: ${adminResult.email}`
+        : `Admin user already present: ${adminResult.email}`
+    );
     console.log(`Server running on port ${PORT}`);
   });
 };

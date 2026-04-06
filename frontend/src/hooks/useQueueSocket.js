@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const socketUrl =
+  import.meta.env.VITE_SOCKET_URL ||
+  (typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:5000`
+    : "http://localhost:5000");
 
 function useQueueSocket({ doctorId, date, onQueueUpdate }) {
   const callbackRef = useRef(onQueueUpdate);
