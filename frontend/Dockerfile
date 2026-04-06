@@ -1,5 +1,5 @@
-ARG VITE_API_URL=http://localhost:5000/api
-ARG VITE_SOCKET_URL=http://localhost:5000
+ARG VITE_API_URL=/api
+ARG VITE_SOCKET_URL=
 
 FROM node:20-alpine AS build
 
