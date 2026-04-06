@@ -6,23 +6,17 @@ const connectDB = require("./config/db");
 const app = require("./app");
 const { setIO } = require("./config/socket");
 const Appointment = require("./models/Appointment");
-const ensureAdminUser = require("./utils/ensureAdminUser");
 
 const PORT = process.env.PORT || 5000;
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
 
 const startServer = async () => {
   await connectDB();
-  const adminResult = await ensureAdminUser();
   await Appointment.syncIndexes();
 
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: allowedOrigins,
+      origin: process.env.CLIENT_URL || "http://localhost:5173",
       methods: ["GET", "POST"],
     },
   });
@@ -40,11 +34,6 @@ const startServer = async () => {
   });
 
   server.listen(PORT, () => {
-    console.log(
-      adminResult.created
-        ? `Seeded admin user: ${adminResult.email}`
-        : `Admin user already present: ${adminResult.email}`
-    );
     console.log(`Server running on port ${PORT}`);
   });
 };

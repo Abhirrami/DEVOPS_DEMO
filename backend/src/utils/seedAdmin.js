@@ -1,16 +1,25 @@
 require("dotenv").config();
 const connectDB = require("../config/db");
-const ensureAdminUser = require("./ensureAdminUser");
+const User = require("../models/User");
 
 const seedAdmin = async () => {
   try {
     await connectDB();
-    const { created } = await ensureAdminUser();
 
-    if (!created) {
+    const email = process.env.ADMIN_EMAIL || "admin@clinic.com";
+    const existing = await User.findOne({ email });
+
+    if (existing) {
       console.log("Admin already exists.");
       process.exit(0);
     }
+
+    await User.create({
+      name: process.env.ADMIN_NAME || "System Admin",
+      email,
+      password: process.env.ADMIN_PASSWORD || "Admin@123",
+      role: "admin",
+    });
 
     console.log("Admin user created successfully.");
     process.exit(0);
