@@ -85,7 +85,7 @@ function LoginPage() {
             </Link>
           </p>
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-            Default seeded admin credentials come from backend env values, for example `admin@clinic.com / Admin@123`.
+            Default seeded admin credentials come from backend env values, use example `admin@clinic.com / Admin@123`.
           </div>
         </div>
       </div>
